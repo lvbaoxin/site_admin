@@ -100,16 +100,3 @@ cnpm run build
 - <a href="https://github.com/antoniandre/splitpanes" target="_blank">splitpanes</a>
 - <a href="https://github.com/jsplumb/jsplumb" target="_blank">jsplumb</a>
 
-#### 💕 特别感谢
-
-特别感谢老哥们的建议、指导与帮忙。谢谢！
-
-- <a href="https://gitee.com/click33/sa-plus" target="_blank">@省长</a>
-- <a href="https://gitee.com/jskz/Jskz-SpringCloud" target="_blank">@唐参</a>
-- <a href="https://gitee.com/chuange" target="_blank">@川歌</a>
-- @华仔
-
-#### 💌 支持作者
-
-如果觉得框架不错，或者已经在使用了，希望你可以去 <a target="_blank" href="https://github.com/lyt-Top/vue-next-admin">Github</a> 或者
-<a target="_blank" href="https://gitee.com/lyt-top/vue-next-admin">Gitee</a> 帮我点个 ⭐ Star，这将是对我极大的鼓励与支持。
