@@ -1,17 +1,8 @@
-import request from '/@/utils/request';
-const role = 'http://localhost:8000/role'
+const base_url = 'http://localhost:8000/'
 
-export function Api() {
-  return {
-    role: (params: object) => {
-      return request({
-        url: role,
-        method: 'post',
-        data: params,
-      });
-    },
-
-
-  };
+const API = {
+   role: base_url + 'role/'
 }
-export default Api
+
+export default API
+

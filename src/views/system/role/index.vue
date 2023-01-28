@@ -3,7 +3,7 @@
 		<div class="system-role-padding layout-padding-auto layout-padding-view">
 			<div class="system-user-search mb15">
 				<el-input v-model="tableData.param.search" size="default" placeholder="请输入角色名称" style="max-width: 180px"> </el-input>
-				<el-button size="default" type="primary" class="ml10">
+				<el-button size="default" type="primary" class="ml10" @click="searchList">
 					<el-icon>
 						<ele-Search />
 					</el-icon>
@@ -17,7 +17,7 @@
 				</el-button>
 			</div>
 			<el-table :data="tableData.data" style="width: 100%">
-				<el-table-column type="index" label="序号" width="60" />
+<!--				<el-table-column type="index" label="序号" width="60" />-->
 				<el-table-column prop="roleName" label="角色名称" show-overflow-tooltip></el-table-column>
 				<el-table-column prop="roleSign" label="角色标识" show-overflow-tooltip></el-table-column>
 				<el-table-column prop="sort" label="排序" show-overflow-tooltip></el-table-column>
@@ -60,6 +60,9 @@
 <script lang="ts">
 import { defineAsyncComponent, toRefs, reactive, onMounted, ref, defineComponent } from 'vue';
 import { ElMessageBox, ElMessage } from 'element-plus';
+import request from '/@/utils/manage';
+import API from "/@/api/api";
+
 
 // 定义接口来定义对象的类型
 interface TableData {
@@ -100,30 +103,32 @@ export default defineComponent({
 				param: {
 					search: '',
 					pageNum: 1,
-					pageSize: 10,
+					pageSize:10,
 				},
 			},
 		});
 		// 初始化表格数据
-		const initTableData = () => {
-			const data: Array<TableData> = [];
-			for (let i = 0; i < 20; i++) {
-				data.push({
-					roleName: i === 0 ? '超级管理员' : '普通用户',
-					roleSign: i === 0 ? 'admin' : 'common',
-					describe: `测试角色${i + 1}`,
-					sort: i,
-					status: true,
-					createTime: new Date().toLocaleString(),
-				});
-			}
-			state.tableData.data = data;
-			state.tableData.total = state.tableData.data.length;
+		const initTableData = (val:any) => {
+      request.getAction(API.role, {...state.tableData.param},{}).then(res => {
+        console.log(res,'res')
+        state.tableData.data = res.data.data;
+        state.tableData.total = res.data.cont;
+      }).catch((e) => {
+        ElMessage.warning(e);
+      })
 		};
 		// 打开新增角色弹窗
 		const onOpenAddRole = () => {
 			addRoleRef.value.openDialog();
 		};
+    // 查询
+    const searchList = () => {
+      //initTableData(state.tableData.param.search)
+
+      initTableData({...state.tableData.param})
+      console.log({...state.tableData.param},'...state.tableData.param')
+    };
+
 		// 打开修改角色弹窗
 		const onOpenEditRole = (row: Object) => {
 			editRoleRef.value.openDialog(row);
@@ -136,27 +141,41 @@ export default defineComponent({
 				type: 'warning',
 			})
 				.then(() => {
-					ElMessage.success('删除成功');
+          request.deleteAction(API.role,{"id":row.id},{}).then(res => {
+            if(res.data.code==0){
+              ElMessage.warning(res.data.message);
+            }
+            else{
+              ElMessage.success('删除成功');
+            }
+          }).catch((e) => {
+            ElMessage.warning(e);
+          })
 				})
 				.catch(() => {});
 		};
 		// 分页改变
 		const onHandleSizeChange = (val: number) => {
 			state.tableData.param.pageSize = val;
+      initTableData({...state.tableData.param})
 		};
 		// 分页改变
 		const onHandleCurrentChange = (val: number) => {
 			state.tableData.param.pageNum = val;
+      initTableData({...state.tableData.param})
 		};
 		// 页面加载时
 		onMounted(() => {
-			initTableData();
+			initTableData("");
+
+
 		});
 		return {
 			addRoleRef,
 			editRoleRef,
 			onOpenAddRole,
 			onOpenEditRole,
+      searchList,
 			onRowDel,
 			onHandleSizeChange,
 			onHandleCurrentChange,

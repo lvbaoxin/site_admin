@@ -33,11 +33,11 @@
 							<el-input v-model="ruleForm.describe" type="textarea" placeholder="请输入角色描述" maxlength="150"></el-input>
 						</el-form-item>
 					</el-col>
-					<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
-						<el-form-item label="菜单权限">
-							<el-tree :data="menuData" :props="menuProps" show-checkbox class="menu-data-tree" />
-						</el-form-item>
-					</el-col>
+<!--					<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">-->
+<!--						<el-form-item label="菜单权限">-->
+<!--							<el-tree :data="menuData" :props="menuProps" show-checkbox class="menu-data-tree" />-->
+<!--						</el-form-item>-->
+<!--					</el-col>-->
 				</el-row>
 			</el-form>
 			<template #footer>
@@ -51,9 +51,23 @@
 </template>
 
 <script lang="ts">
+// 定义接口来定义对象的类型
+import {useRouter} from "vue-router";
+
+interface TableData {
+  roleName: string;
+  roleSign: string;
+  describe: string;
+  sort: number;
+  status: boolean;
+  createTime: string;
+}
 import { reactive, toRefs, defineComponent,onMounted,onBeforeMount} from 'vue';
 
 import {useLoginApi} from "/@/api/login/index"
+import request from "/@/utils/manage";
+import API from "/@/api/api";
+import {ElMessage} from "element-plus";
 // 定义接口来定义对象的类型
 interface MenuDataTree {
 	id: number;
@@ -80,11 +94,10 @@ export default defineComponent({
 	name: 'systemAddRole',
 	setup() {
     onBeforeMount(() => {
-      console.log(useLoginApi().signIn({}))
-      useLoginApi().signIn({}).then(res=>{
-        console.log(res,'res')
-      })
+
     })
+    const router = useRouter();
+
 
 
 		const state = reactive<RoleState>({
@@ -101,6 +114,7 @@ export default defineComponent({
 				children: 'children',
 				label: 'label',
 			},
+
 		});
 		// 打开弹窗
 		const openDialog = () => {
@@ -117,9 +131,18 @@ export default defineComponent({
 		};
 		// 新增
 		const onSubmit = () => {
-      console.log({...state.ruleForm},'ruleForm')
-    //  console.log({state.api,'ruleForm')
-
+      request.postAction(API.role,{...state.ruleForm},{}).then(res => {
+        console.log(res,'res')
+        if(res.data.code==0){
+          ElMessage.warning(res.data.message);
+        }
+        else{
+          ElMessage.success('添加成功');
+          router.push('/system/role');
+        }
+      }).catch((e) => {
+        ElMessage.warning(e);
+      })
 			closeDialog();
 		};
 		// 获取菜单结构数据
