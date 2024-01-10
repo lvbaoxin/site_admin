@@ -66,7 +66,7 @@ interface DialogRow {
 	roleName: string;
 	roleSign: string;
 	sort: number;
-	status: boolean | number;
+	status: boolean;
 	describe: string;
 }
 interface RoleState {

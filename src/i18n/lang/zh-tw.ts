@@ -73,6 +73,8 @@ export default {
 		layoutLinkView: '外鏈',
 		layoutIframeViewOne: '内嵌 iframe1',
 		layoutIframeViewTwo: '内嵌 iframe2',
+		post: '内容管理',
+		article: '文章管理',
 	},
 	staticRoutes: {
 		signIn: '登入',

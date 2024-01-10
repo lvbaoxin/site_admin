@@ -73,6 +73,8 @@ export default {
 		layoutLinkView: 'LinkView',
 		layoutIframeViewOne: 'IframeViewOne',
 		layoutIframeViewTwo: 'IframeViewTwo',
+		post: 'post',
+		article: 'article',
 	},
 	staticRoutes: {
 		signIn: 'signIn',

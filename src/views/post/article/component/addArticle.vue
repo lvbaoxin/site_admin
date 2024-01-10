@@ -1,11 +1,11 @@
 <template>
-	<div class="system-edit-role-container">
-		<el-dialog title="修改角色" v-model="isShowDialog" width="769px">
-			<el-form :model="ruleForm" size="default" label-width="90px">
+	<div class="system-add-role-container">
+		<el-dialog title="新增文章" v-model="isShowDialog" width="769px">
+			<el-form :model="blogForm" size="default" label-width="90px">
 				<el-row :gutter="35">
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
 						<el-form-item label="角色名称">
-							<el-input v-model="ruleForm.roleName" placeholder="请输入角色名称" clearable></el-input>
+							<el-input v-model="blogForm.roleName" placeholder="请输入角色名称" clearable></el-input>
 						</el-form-item>
 					</el-col>
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
@@ -15,27 +15,30 @@
 									<span>角色标识</span>
 								</el-tooltip>
 							</template>
-							<el-input v-model="ruleForm.roleSign" placeholder="请输入角色标识" clearable></el-input>
+							<el-input v-model="blogForm.roleSign" placeholder="请输入角色标识" clearable></el-input>
 						</el-form-item>
 					</el-col>
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="排序">
-							<el-input-number v-model="ruleForm.sort" :min="0" :max="999" controls-position="right" placeholder="请输入排序" class="w100" />
+						<el-form-item label="上传封面">
+							<Upload ref="UploadRef" v-model="blogForm.pic" />
+<!--              <el-upload class="h100 personal-user-left-upload" action="http://localhost:8000/add_user_image/" multiple :limit="1">-->
+<!--                <img src="https://img2.baidu.com/it/u=1978192862,2048448374&fm=253&fmt=auto&app=138&f=JPEG?w=504&h=500" />-->
+<!--              </el-upload>-->
 						</el-form-item>
 					</el-col>
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
 						<el-form-item label="角色状态">
-							<el-switch v-model="ruleForm.status" inline-prompt active-text="启" inactive-text="禁"></el-switch>
+							<el-switch v-model="blogForm.status" inline-prompt active-text="启" inactive-text="禁"></el-switch>
 						</el-form-item>
 					</el-col>
 					<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
 						<el-form-item label="角色描述">
-							<el-input v-model="ruleForm.describe" type="textarea" placeholder="请输入角色描述" maxlength="150"></el-input>
+							<el-input v-model="blogForm.describe" type="textarea" placeholder="请输入角色描述" maxlength="150"></el-input>
 						</el-form-item>
 					</el-col>
 <!--					<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">-->
 <!--						<el-form-item label="菜单权限">-->
-<!--							<el-tree :data="menuData" :props="menuProps" :default-checked-keys="[112, 113]" node-key="id" show-checkbox class="menu-data-tree" />-->
+<!--							<el-tree :data="menuData" :props="menuProps" show-checkbox class="menu-data-tree" />-->
 <!--						</el-form-item>-->
 <!--					</el-col>-->
 				</el-row>
@@ -43,7 +46,7 @@
 			<template #footer>
 				<span class="dialog-footer">
 					<el-button @click="onCancel" size="default">取 消</el-button>
-					<el-button type="primary" @click="onSubmit" size="default">修 改</el-button>
+					<el-button type="primary" @click="onSubmit" size="default">新 增</el-button>
 				</span>
 			</template>
 		</el-dialog>
@@ -51,27 +54,42 @@
 </template>
 
 <script lang="ts">
-import { reactive, toRefs, defineComponent } from 'vue';
+
+// 定义接口来定义对象的类型
+import {useRouter} from "vue-router";
+
+interface TableData {
+  title: string;
+  description: string;
+  descriptionUpload: string;
+  is_del: boolean;
+  createTime: string;
+  pic: string;
+}
+
+import {reactive, toRefs, defineComponent, onMounted, onBeforeMount, defineAsyncComponent, ref} from 'vue';
+
+import {useLoginApi} from "/@/api/login/index"
 import request from "/@/utils/manage";
 import API from "/@/api/api";
 import {ElMessage} from "element-plus";
-
 // 定义接口来定义对象的类型
 interface MenuDataTree {
 	id: number;
 	label: string;
 	children?: MenuDataTree[];
 }
-interface DialogRow {
-	roleName: string;
-	roleSign: string;
-	sort: number;
-	status: boolean | number;
-	describe: string;
-}
 interface RoleState {
 	isShowDialog: boolean;
-	ruleForm: DialogRow;
+	blogForm: {
+    title: string;
+    description: string;
+    descriptionUpload: string;
+    is_del: boolean;
+    createTime: string;
+    pic: string;
+
+	};
 	menuData: Array<MenuDataTree>;
 	menuProps: {
 		children: string;
@@ -80,26 +98,33 @@ interface RoleState {
 }
 
 export default defineComponent({
-	name: 'systemEditRole',
+	name: 'systemAddRole',
+  components: {
+    Upload: defineAsyncComponent(() => import('/@/components/upload/index.vue')),
+  },
 	setup() {
+    const UploadRef = ref();
+    onBeforeMount(() => {
+    })
+    const router = useRouter();
 		const state = reactive<RoleState>({
 			isShowDialog: false,
-			ruleForm: {
-				roleName: '', // 角色名称
-				roleSign: '', // 角色标识
-				sort: 0, // 排序
-				status: true, // 角色状态
-				describe: '', // 角色描述
+			blogForm: {
+        title: '', // 角色名称
+        description: '', // 角色标识
+        is_del: true, // 角色状态
+        descriptionUpload: '', // 角色描述
+        pic: '',
 			},
 			menuData: [],
 			menuProps: {
 				children: 'children',
 				label: 'label',
 			},
+
 		});
 		// 打开弹窗
-		const openDialog = (row: DialogRow) => {
-			state.ruleForm = row;
+		const openDialog = () => {
 			state.isShowDialog = true;
 			getMenuData();
 		};
@@ -113,14 +138,14 @@ export default defineComponent({
 		};
 		// 新增
 		const onSubmit = () => {
-      console.log({...state.ruleForm},'ruleForm')
-      request.putAction(API.role,{...state.ruleForm},{}).then(res => {
+      request.postAction(API.blog,{...state.blogForm},{}).then(res => {
         console.log(res,'res')
         if(res.data.code==0){
           ElMessage.warning(res.data.message);
         }
         else{
-          ElMessage.success('修改成功');
+          ElMessage.success('添加成功');
+          router.push('/post/article');
         }
       }).catch((e) => {
         ElMessage.warning(e);
@@ -241,12 +266,14 @@ export default defineComponent({
 			onSubmit,
 			...toRefs(state),
 		};
+
 	},
+
 });
 </script>
 
 <style scoped lang="scss">
-.system-edit-role-container {
+.system-add-role-container {
 	.menu-data-tree {
 		width: 100%;
 		border: 1px solid var(--el-border-color);

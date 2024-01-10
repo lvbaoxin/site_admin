@@ -16,28 +16,27 @@
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
 						<el-form-item label="关联角色">
 							<el-select v-model="ruleForm.roleSign" placeholder="请选择" clearable class="w100">
-								<el-option label="超级管理员" value="admin"></el-option>
-								<el-option label="普通用户" value="common"></el-option>
+								<el-option v-for="item in roleSignList" :label="item.roleName" :value="item.id"></el-option>
 							</el-select>
 						</el-form-item>
 					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="部门">
-							<el-cascader
-								:options="deptData"
-								:props="{ checkStrictly: true, value: 'deptName', label: 'deptName' }"
-								placeholder="请选择部门"
-								clearable
-								class="w100"
-								v-model="ruleForm.department"
-							>
-								<template #default="{ node, data }">
-									<span>{{ data.deptName }}</span>
-									<span v-if="!node.isLeaf"> ({{ data.children.length }}) </span>
-								</template>
-							</el-cascader>
-						</el-form-item>
-					</el-col>
+<!--					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">-->
+<!--						<el-form-item label="部门">-->
+<!--							<el-cascader-->
+<!--								:options="deptData"-->
+<!--								:props="{ checkStrictly: true, value: 'deptName', label: 'deptName' }"-->
+<!--								placeholder="请选择部门"-->
+<!--								clearable-->
+<!--								class="w100"-->
+<!--								v-model="ruleForm.department"-->
+<!--							>-->
+<!--								<template #default="{ node, data }">-->
+<!--									<span>{{ data.deptName }}</span>-->
+<!--									<span v-if="!node.isLeaf"> ({{ data.children.length }}) </span>-->
+<!--								</template>-->
+<!--							</el-cascader>-->
+<!--						</el-form-item>-->
+<!--					</el-col>-->
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
 						<el-form-item label="手机号">
 							<el-input v-model="ruleForm.phone" placeholder="请输入手机号" clearable></el-input>
@@ -51,8 +50,8 @@
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
 						<el-form-item label="性别">
 							<el-select v-model="ruleForm.sex" placeholder="请选择" clearable class="w100">
-								<el-option label="男" value="男"></el-option>
-								<el-option label="女" value="女"></el-option>
+								<el-option label="男" value="1"></el-option>
+								<el-option label="女" value="0"></el-option>
 							</el-select>
 						</el-form-item>
 					</el-col>
@@ -90,17 +89,31 @@
 
 <script lang="ts">
 import { reactive, toRefs, onMounted, defineComponent } from 'vue';
+import request from "/@/utils/manage";
+import API from "/@/api/api";
+import {ElMessage} from "element-plus";
+import router from '/@/router';
 
 // 定义接口来定义对象的类型
 interface DeptData {
 	deptName: string;
 	createTime: string;
-	status: boolean;
+	status: boolean | number;
 	sort: number | string;
 	describe: string;
 	id: number;
 	children?: DeptData[];
 }
+interface roleSignList {
+  roleName: string;
+  createTime: string;
+  status: boolean | number;
+  sort: number | string;
+  describe: string;
+  id: number;
+  roleSign: string;
+}
+
 interface UserState {
 	isShowDialog: boolean;
 	ruleForm: {
@@ -113,10 +126,13 @@ interface UserState {
 		sex: string;
 		password: string;
 		overdueTime: string;
-		status: boolean;
+		status: boolean | number;
 		describe: string;
 	};
 	deptData: Array<DeptData>;
+  roleSignList: Array<roleSignList>;
+
+
 }
 
 export default defineComponent({
@@ -137,10 +153,15 @@ export default defineComponent({
 				status: true, // 用户状态
 				describe: '', // 用户描述
 			},
+
 			deptData: [], // 部门数据
+      roleSignList:[]
+
 		});
+
 		// 打开弹窗
 		const openDialog = () => {
+      initTableData();
 			state.isShowDialog = true;
 		};
 		// 关闭弹窗
@@ -153,40 +174,61 @@ export default defineComponent({
 		};
 		// 新增
 		const onSubmit = () => {
+      request.postAction(API.user,{...state.ruleForm},{}).then(res => {
+        console.log(res,'res')
+        if(res.data.code==0){
+          ElMessage.warning(res.data.message);
+        }
+        else{
+          ElMessage.success('添加成功');
+          router.push('/system/user');
+        }
+      }).catch((e) => {
+        ElMessage.warning(e);
+      })
 			closeDialog();
 		};
 		// 初始化部门数据
 		const initTableData = () => {
-			state.deptData.push({
-				deptName: 'vueNextAdmin',
-				createTime: new Date().toLocaleString(),
-				status: true,
-				sort: Math.random(),
-				describe: '顶级部门',
-				id: Math.random(),
-				children: [
-					{
-						deptName: 'IT外包服务',
-						createTime: new Date().toLocaleString(),
-						status: true,
-						sort: Math.random(),
-						describe: '总部',
-						id: Math.random(),
-					},
-					{
-						deptName: '资本控股',
-						createTime: new Date().toLocaleString(),
-						status: true,
-						sort: Math.random(),
-						describe: '分部',
-						id: Math.random(),
-					},
-				],
-			});
+      request.getAction(API.role, {
+          search: '',
+          pageNum: 1,
+          pageSize:100,
+        },{}).then(res => {
+        state.roleSignList = res.data.data
+      }).catch((e) => {
+        ElMessage.warning(e);
+      })
+			// state.deptData.push({
+			// 	deptName: 'vueNextAdmin',
+			// 	createTime: new Date().toLocaleString(),
+			// 	status: true,
+			// 	sort: Math.random(),
+			// 	describe: '顶级部门',
+			// 	id: Math.random(),
+			// 	children: [
+			// 		{
+			// 			deptName: 'IT外包服务',
+			// 			createTime: new Date().toLocaleString(),
+			// 			status: true,
+			// 			sort: Math.random(),
+			// 			describe: '总部',
+			// 			id: Math.random(),
+			// 		},
+			// 		{
+			// 			deptName: '资本控股',
+			// 			createTime: new Date().toLocaleString(),
+			// 			status: true,
+			// 			sort: Math.random(),
+			// 			describe: '分部',
+			// 			id: Math.random(),
+			// 		},
+			// 	],
+			// });
 		};
 		// 页面加载时
 		onMounted(() => {
-			initTableData();
+		//	initTableData();
 		});
 		return {
 			openDialog,

@@ -140,6 +140,40 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 				],
 			},
 			{
+				path: '/post',
+				name: 'post',
+				component: () => import('/@/layout/routerView/parent.vue'),
+				redirect: '/post/post',
+				meta: {
+					title: 'message.router.post',
+					isLink: '',
+					isHide: false,
+					isKeepAlive: true,
+					isAffix: false,
+					isIframe: false,
+					roles: ['admin'],
+					icon: 'iconfont icon-xitongshezhi',
+				},
+				children: [
+					{
+						path: '/post/article',
+						name: 'frontEnd',
+						component: () => import('/@/views/post/article/index.vue'),
+						meta: {
+							title: 'message.router.article',
+							isLink: '',
+							isHide: false,
+							isKeepAlive: true,
+							isAffix: false,
+							isIframe: false,
+							roles: ['admin'],
+							icon: 'iconfont icon-caidan',
+						},
+					},
+
+				],
+			},
+			{
 				path: '/limits',
 				name: 'limits',
 				component: () => import('/@/layout/routerView/parent.vue'),

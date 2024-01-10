@@ -2,8 +2,8 @@
 	<div class="system-user-container layout-padding">
 		<el-card shadow="hover" class="layout-padding-auto">
 			<div class="system-user-search mb15">
-				<el-input size="default" placeholder="请输入用户名称" style="max-width: 180px"> </el-input>
-				<el-button size="default" type="primary" class="ml10">
+				<el-input size="default"  v-model="tableData.param.search"  placeholder="请输入用户名称" style="max-width: 180px"> </el-input>
+				<el-button size="default" type="primary" class="ml10" @click="searchList">
 					<el-icon>
 						<ele-Search />
 					</el-icon>
@@ -21,7 +21,6 @@
 				<el-table-column prop="userName" label="账户名称" show-overflow-tooltip></el-table-column>
 				<el-table-column prop="userNickname" label="用户昵称" show-overflow-tooltip></el-table-column>
 				<el-table-column prop="roleSign" label="关联角色" show-overflow-tooltip></el-table-column>
-				<el-table-column prop="department" label="部门" show-overflow-tooltip></el-table-column>
 				<el-table-column prop="phone" label="手机号" show-overflow-tooltip></el-table-column>
 				<el-table-column prop="email" label="邮箱" show-overflow-tooltip></el-table-column>
 				<el-table-column prop="status" label="用户状态" show-overflow-tooltip>
@@ -61,6 +60,9 @@
 <script lang="ts">
 import { defineAsyncComponent, toRefs, reactive, onMounted, ref, defineComponent } from 'vue';
 import { ElMessageBox, ElMessage } from 'element-plus';
+import request from "/@/utils/manage";
+import API from "/@/api/api";
+import router from "/@/router";
 
 // 定义接口来定义对象的类型
 interface TableDataRow {
@@ -73,7 +75,7 @@ interface TableDataRow {
 	sex: string;
 	password: string;
 	overdueTime: Date;
-	status: boolean;
+  status:  number | boolean ;
 	describe: string;
 	createTime: string;
 }
@@ -83,6 +85,7 @@ interface TableDataState {
 		total: number;
 		loading: boolean;
 		param: {
+      search:string,
 			pageNum: number;
 			pageSize: number;
 		};
@@ -104,30 +107,38 @@ export default defineComponent({
 				total: 0,
 				loading: false,
 				param: {
+          search: '',
 					pageNum: 1,
 					pageSize: 10,
 				},
 			},
 		});
 		// 初始化表格数据
-		const initTableData = () => {
+		const initTableData = (val:any) => {
 			const data: Array<TableDataRow> = [];
-			for (let i = 0; i < 2; i++) {
-				data.push({
-					userName: i === 0 ? 'admin' : 'test',
-					userNickname: i === 0 ? '我是管理员' : '我是普通用户',
-					roleSign: i === 0 ? 'admin' : 'common',
-					department: i === 0 ? ['vueNextAdmin', 'IT外包服务'] : ['vueNextAdmin', '资本控股'],
-					phone: '12345678910',
-					email: 'vueNextAdmin@123.com',
-					sex: '女',
-					password: '123456',
-					overdueTime: new Date(),
-					status: true,
-					describe: i === 0 ? '不可删除' : '测试用户',
-					createTime: new Date().toLocaleString(),
-				});
-			}
+      request.getAction(API.user,{...state.tableData.param},{}).then(res => {
+        console.log(res,'res')
+        state.tableData.data = res.data.data;
+        state.tableData.total = res.data.cont;
+      }).catch((e) => {
+        ElMessage.warning(e);
+      })
+			// for (let i = 0; i < 2; i++) {
+			// 	data.push({
+			// 		userName: i === 0 ? 'admin' : 'test',
+			// 		userNickname: i === 0 ? '我是管理员' : '我是普通用户',
+			// 		roleSign: i === 0 ? 'admin' : 'common',
+			// 		department: i === 0 ? ['vueNextAdmin', 'IT外包服务'] : ['vueNextAdmin', '资本控股'],
+			// 		phone: '12345678910',
+			// 		email: 'vueNextAdmin@123.com',
+			// 		sex: '女',
+			// 		password: '123456',
+			// 		overdueTime: new Date(),
+			// 		status: true,
+			// 		describe: i === 0 ? '不可删除' : '测试用户',
+			// 		createTime: new Date().toLocaleString(),
+			// 	});
+			// }
 			state.tableData.data = data;
 			state.tableData.total = state.tableData.data.length;
 		};
@@ -137,31 +148,51 @@ export default defineComponent({
 		};
 		// 打开修改用户弹窗
 		const onOpenEditUser = (row: TableDataRow) => {
+      console.log(row,'edit')
 			editUserRef.value.openDialog(row);
 		};
 		// 删除用户
-		const onRowDel = (row: TableDataRow) => {
+		const onRowDel = (row: any) => {
 			ElMessageBox.confirm(`此操作将永久删除账户名称：“${row.userName}”，是否继续?`, '提示', {
 				confirmButtonText: '确认',
 				cancelButtonText: '取消',
 				type: 'warning',
 			})
 				.then(() => {
-					ElMessage.success('删除成功');
+          request.deleteAction(API.user,{"id":row.id},{}).then(res => {
+            if(res.data.code==0){
+              ElMessage.warning(res.data.message);
+            }
+            else{
+              ElMessage.success('删除成功');
+              initTableData('');
+            }
+          }).catch((e) => {
+            ElMessage.warning(e);
+          })
 				})
 				.catch(() => {});
 		};
-		// 分页改变
-		const onHandleSizeChange = (val: number) => {
-			state.tableData.param.pageSize = val;
-		};
-		// 分页改变
-		const onHandleCurrentChange = (val: number) => {
-			state.tableData.param.pageNum = val;
-		};
+    // 分页改变
+    const onHandleSizeChange = (val: number) => {
+      state.tableData.param.pageSize = val;
+      initTableData({...state.tableData.param})
+    };
+    // 分页改变
+    const onHandleCurrentChange = (val: number) => {
+      state.tableData.param.pageNum = val;
+      initTableData({...state.tableData.param})
+    };
+    // 查询
+    const searchList = () => {
+      //initTableData(state.tableData.param.search)
+
+      initTableData({...state.tableData.param})
+
+    };
 		// 页面加载时
 		onMounted(() => {
-			initTableData();
+			initTableData('');
 		});
 		return {
 			addUserRef,
@@ -169,6 +200,7 @@ export default defineComponent({
 			onOpenAddUser,
 			onOpenEditUser,
 			onRowDel,
+      searchList,
 			onHandleSizeChange,
 			onHandleCurrentChange,
 			...toRefs(state),

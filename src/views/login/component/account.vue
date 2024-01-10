@@ -61,6 +61,8 @@ import { initBackEndControlRoutes } from '/@/router/backEnd';
 import { Session } from '/@/utils/storage';
 import { formatAxis } from '/@/utils/formatTime';
 import { NextLoading } from '/@/utils/loading';
+import request from "/@/utils/manage";
+import API from "/@/api/api";
 
 export default defineComponent({
 	name: 'loginAccount',
@@ -88,9 +90,9 @@ export default defineComponent({
 		// 登录
 		const onSignIn = async () => {
 			state.loading.signIn = true;
-			// 存储 token 到浏览器缓存
+			//存储 token 到浏览器缓存
 			Session.set('token', Math.random().toString(36).substr(0));
-			// 模拟数据，对接接口时，记得删除多余代码及对应依赖的引入。用于 `/src/stores/userInfo.ts` 中不同用户登录判断（模拟数据）
+			//模拟数据，对接接口时，记得删除多余代码及对应依赖的引入。用于 `/src/stores/userInfo.ts` 中不同用户登录判断（模拟数据）
 			Cookies.set('userName', state.ruleForm.userName);
 			if (!themeConfig.value.isRequestRoutes) {
 				// 前端控制路由，2、请注意执行顺序
@@ -103,6 +105,18 @@ export default defineComponent({
 				// 执行完 initBackEndControlRoutes，再执行 signInSuccess
 				signInSuccess();
 			}
+      // request.postAction(API.login,{...state.ruleForm},{}).then(res => {
+      //   console.log(res,'res')
+      //   if(res.data.code==0){
+      //     ElMessage.warning(res.data.message);
+      //   }
+      //   else{
+      //     ElMessage.success('添加成功');
+      //     router.push('/post/article');
+      //   }
+      // }).catch((e) => {
+      //   ElMessage.warning(e);
+      // })
 		};
 		// 登录成功后的跳转
 		const signInSuccess = () => {
