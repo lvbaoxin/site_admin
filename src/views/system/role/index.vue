@@ -27,7 +27,7 @@
 						<el-tag type="info" v-else>禁用</el-tag>
 					</template>
 				</el-table-column>
-				<el-table-column prop="describe" label="角色描述" show-overflow-tooltip></el-table-column>
+				<el-table-column prop="description" label="角色描述" show-overflow-tooltip></el-table-column>
 				<el-table-column prop="createTime" label="创建时间" show-overflow-tooltip></el-table-column>
 				<el-table-column label="操作" width="100">
 					<template #default="scope">
@@ -68,7 +68,7 @@ import API from "/@/api/api";
 interface TableData {
 	roleName: string;
 	roleSign: string;
-	describe: string;
+  description: string;
 	sort: number;
 	status: boolean;
 	createTime: string;
@@ -109,10 +109,10 @@ export default defineComponent({
 		});
 		// 初始化表格数据
 		const initTableData = (val:any) => {
-      request.getAction(API.role, {...state.tableData.param},{}).then(res => {
+      request.postAction(API.role.list, {...state.tableData.param},{}).then(res => {
         console.log(res,'res')
         state.tableData.data = res.data.data;
-        state.tableData.total = res.data.cont;
+        state.tableData.total = res.data.total;
       }).catch((e) => {
         ElMessage.warning(e);
       })
