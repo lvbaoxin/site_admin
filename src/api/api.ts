@@ -5,8 +5,12 @@ const API = {
       list: base_url + 'role/list',
    },
    blog: base_url + 'blog/',
-   login: base_url + 'login/',
-   user: base_url + 'user/',
+   user: {
+      list: base_url + 'user/list',
+      login: base_url + 'user/login',
+   },
+
+
 }
 
 export default API
