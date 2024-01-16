@@ -114,7 +114,7 @@ export default defineComponent({
       console.log({...state.ruleForm},'ruleForm')
       request.postAction(API.user.login,{...state.ruleForm},{}).then(res => {
         console.log(res,'res')
-        if(res.data.code==0){
+        if(res.data.code==500){
           ElMessage.warning(res.data.message);
         }
         else{
