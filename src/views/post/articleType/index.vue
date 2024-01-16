@@ -2,39 +2,30 @@
 	<div class="system-role-container layout-padding">
 		<div class="system-role-padding layout-padding-auto layout-padding-view">
 			<div class="system-user-search mb15">
-				<el-input v-model="tableData.param.search" size="default" placeholder="请输入角色名称" style="max-width: 180px"> </el-input>
-				<el-button size="default" type="primary" class="ml10" @click="searchList">
-					<el-icon>
-						<ele-Search />
-					</el-icon>
-					查询
-				</el-button>
-				<el-button size="default" type="success" class="ml10" @click="onOpenAddRole">
+        <el-input v-model="tableData.param.search" size="default" placeholder="请输入文章分类名称" style="max-width: 180px"> </el-input>
+        <el-button size="default" type="primary" class="ml10" @click="searchList">
+          <el-icon>
+            <ele-Search />
+          </el-icon>
+          查询
+        </el-button>
+				<el-button size="default" type="success" class="ml10" @click="onOpenAddArticle">
 					<el-icon>
 						<ele-FolderAdd />
 					</el-icon>
-					新增角色
+					新增文章分类
 				</el-button>
 			</div>
 			<el-table :data="tableData.data" style="width: 100%">
-<!--				<el-table-column type="index" label="序号" width="60" />-->
-				<el-table-column prop="roleName" label="角色名称" show-overflow-tooltip></el-table-column>
-				<el-table-column prop="roleSign" label="角色标识" show-overflow-tooltip></el-table-column>
-				<el-table-column prop="sort" label="排序" show-overflow-tooltip></el-table-column>
-				<el-table-column prop="status" label="角色状态" show-overflow-tooltip>
-					<template #default="scope">
-						<el-tag type="success" v-if="scope.row.status">启用</el-tag>
-						<el-tag type="info" v-else>禁用</el-tag>
-					</template>
-				</el-table-column>
-				<el-table-column prop="describe" label="角色描述" show-overflow-tooltip></el-table-column>
-				<el-table-column prop="createTime" label="创建时间" show-overflow-tooltip></el-table-column>
+				<el-table-column prop="title" label="分类标题" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="sort" label="排序" show-overflow-tooltip></el-table-column>
+				<el-table-column prop="createAt" label="创建时间" show-overflow-tooltip></el-table-column>
 				<el-table-column label="操作" width="100">
 					<template #default="scope">
-						<el-button :disabled="scope.row.roleName === '超级管理员'" size="small" text type="primary" @click="onOpenEditRole(scope.row)"
+						<el-button  size="small" text type="primary" @click="onOpenEditArticle(scope.row)"
 							>修改</el-button
 						>
-						<el-button :disabled="scope.row.roleName === '超级管理员'" size="small" text type="primary" @click="onRowDel(scope.row)">删除</el-button>
+						<el-button size="small" text type="primary" @click="onRowDel(scope.row)">删除</el-button>
 					</template>
 				</el-table-column>
 			</el-table>
@@ -52,8 +43,8 @@
 			>
 			</el-pagination>
 		</div>
-		<AddRole ref="addRoleRef" />
-		<EditRole ref="editRoleRef" />
+		<AddArticle ref="addArticleRef" />
+		<EditArticle ref="editArticleRef" />
 	</div>
 </template>
 
@@ -66,10 +57,10 @@ import API from "/@/api/api";
 
 // 定义接口来定义对象的类型
 interface TableData {
-	roleName: string;
-	roleSign: string;
-	describe: string;
-	sort: number;
+  title: string;
+  pic: string;
+  is_del: string;
+  description: number;
 	status: boolean;
 	createTime: string;
 }
@@ -89,12 +80,12 @@ interface TableDataState {
 export default defineComponent({
 	name: 'systemRole',
 	components: {
-		AddRole: defineAsyncComponent(() => import('/@/views/system/role/component/addRole.vue')),
-		EditRole: defineAsyncComponent(() => import('/@/views/system/role/component/editRole.vue')),
+		AddArticle: defineAsyncComponent(() => import('/@/views/post/article/component/addArticle.vue')),
+		EditArticle: defineAsyncComponent(() => import('/@/views/post/article/component/editArticle.vue')),
 	},
 	setup() {
-		const addRoleRef = ref();
-		const editRoleRef = ref();
+		const addArticleRef = ref();
+		const editArticleRef = ref();
 		const state = reactive<TableDataState>({
 			tableData: {
 				data: [],
@@ -109,17 +100,17 @@ export default defineComponent({
 		});
 		// 初始化表格数据
 		const initTableData = (val:any) => {
-      request.getAction(API.role, {...state.tableData.param},{}).then(res => {
+      request.postAction(API.blogcategory.listPage, {...state.tableData.param},{}).then(res => {
         console.log(res,'res')
         state.tableData.data = res.data.data;
-        state.tableData.total = res.data.cont;
+        state.tableData.total = res.data.total;
       }).catch((e) => {
         ElMessage.warning(e);
       })
 		};
 		// 打开新增角色弹窗
-		const onOpenAddRole = () => {
-			addRoleRef.value.openDialog();
+		const onOpenAddArticle = () => {
+			addArticleRef.value.openDialog();
 		};
     // 查询
     const searchList = () => {
@@ -130,8 +121,8 @@ export default defineComponent({
     };
 
 		// 打开修改角色弹窗
-		const onOpenEditRole = (row: Object) => {
-			editRoleRef.value.openDialog(row);
+		const onOpenEditArticle = (row: Object) => {
+			editArticleRef.value.openDialog(row);
 		};
 		// 删除角色
 		const onRowDel = (row: any) => {
@@ -141,7 +132,7 @@ export default defineComponent({
 				type: 'warning',
 			})
 				.then(() => {
-          request.deleteAction(API.role,{"id":row.id},{}).then(res => {
+          request.deleteAction(API.blog,{"id":row.id},{}).then(res => {
             if(res.data.code==0){
               ElMessage.warning(res.data.message);
             }
@@ -171,10 +162,10 @@ export default defineComponent({
 
 		});
 		return {
-			addRoleRef,
-			editRoleRef,
-			onOpenAddRole,
-			onOpenEditRole,
+			addArticleRef,
+			editArticleRef,
+      onOpenAddArticle,
+			onOpenEditArticle,
       searchList,
 			onRowDel,
 			onHandleSizeChange,

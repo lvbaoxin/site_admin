@@ -156,8 +156,23 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 				},
 				children: [
 					{
+						path: '/post/articleType',
+						name: 'articleType',
+						component: () => import('/@/views/post/articleType/index.vue'),
+						meta: {
+							title: 'message.router.articleType',
+							isLink: '',
+							isHide: false,
+							isKeepAlive: true,
+							isAffix: false,
+							isIframe: false,
+							roles: ['admin'],
+							icon: 'iconfont icon-caidan',
+						},
+					},
+					{
 						path: '/post/article',
-						name: 'frontEnd',
+						name: 'article',
 						component: () => import('/@/views/post/article/index.vue'),
 						meta: {
 							title: 'message.router.article',

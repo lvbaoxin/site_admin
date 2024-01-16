@@ -75,6 +75,7 @@ export default {
 		layoutIframeViewTwo: '内嵌 iframe2',
 		post: '内容管理',
 		article: '文章管理',
+		articleType: '文章分类管理',
 	},
 	staticRoutes: {
 		signIn: '登录',

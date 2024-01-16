@@ -75,6 +75,7 @@ export default {
 		layoutIframeViewTwo: 'IframeViewTwo',
 		post: 'post',
 		article: 'article',
+		articleType: 'articleType',
 	},
 	staticRoutes: {
 		signIn: 'signIn',

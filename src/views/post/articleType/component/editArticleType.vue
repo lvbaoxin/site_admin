@@ -1,6 +1,6 @@
 <template>
 	<div class="system-edit-role-container">
-		<el-dialog title="修改角色" v-model="isShowDialog" width="769px">
+		<el-dialog title="修改文章" v-model="isShowDialog" width="769px">
 			<el-form :model="ruleForm" size="default" label-width="90px">
 				<el-row :gutter="35">
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
@@ -19,7 +19,7 @@
 						</el-form-item>
 					</el-col>
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="排序">
+						<el-form-item label="封面">
 							<el-input-number v-model="ruleForm.sort" :min="0" :max="999" controls-position="right" placeholder="请输入排序" class="w100" />
 						</el-form-item>
 					</el-col>
