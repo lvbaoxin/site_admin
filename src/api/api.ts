@@ -9,8 +9,6 @@ const API = {
       list: base_url + 'user/list',
       login: base_url + 'user/login',
    },
-
-
 }
 
 export default API
