@@ -1,46 +1,44 @@
 <template>
 	<div class="system-add-role-container">
 		<el-dialog title="新增文章" v-model="isShowDialog" width="769px">
-			<el-form :model="blogForm" size="default" label-width="90px">
+			<el-form :model="addForm" size="default" label-width="90px">
 				<el-row :gutter="35">
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="角色名称">
-							<el-input v-model="blogForm.roleName" placeholder="请输入角色名称" clearable></el-input>
+						<el-form-item label="标题">
+							<el-input v-model="addForm.title" placeholder="请输入标题" clearable></el-input>
 						</el-form-item>
 					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="角色标识">
-							<template #label>
-								<el-tooltip effect="dark" content="用于 `router/route.ts` meta.roles" placement="top-start">
-									<span>角色标识</span>
-								</el-tooltip>
-							</template>
-							<el-input v-model="blogForm.roleSign" placeholder="请输入角色标识" clearable></el-input>
-						</el-form-item>
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="上传封面">
-							<Upload ref="UploadRef" v-model="blogForm.pic" />
-<!--              <el-upload class="h100 personal-user-left-upload" action="http://localhost:8000/add_user_image/" multiple :limit="1">-->
-<!--                <img src="https://img2.baidu.com/it/u=1978192862,2048448374&fm=253&fmt=auto&app=138&f=JPEG?w=504&h=500" />-->
-<!--              </el-upload>-->
-						</el-form-item>
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="角色状态">
-							<el-switch v-model="blogForm.status" inline-prompt active-text="启" inactive-text="禁"></el-switch>
-						</el-form-item>
-					</el-col>
-					<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
-						<el-form-item label="角色描述">
-							<el-input v-model="blogForm.describe" type="textarea" placeholder="请输入角色描述" maxlength="150"></el-input>
-						</el-form-item>
-					</el-col>
-<!--					<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">-->
-<!--						<el-form-item label="菜单权限">-->
-<!--							<el-tree :data="menuData" :props="menuProps" show-checkbox class="menu-data-tree" />-->
+
+<!--					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">-->
+<!--						<el-form-item label="上传封面">-->
+<!--							<Upload ref="UploadRef" v-model="addForm.pic" />-->
 <!--						</el-form-item>-->
 <!--					</el-col>-->
+          <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
+            <el-form-item label="分类">
+              <el-select v-model="addForm.blogCategoryId"  placeholder="请选择文章分类"  class="w100">
+                <el-option v-for="item in menuData" :label="item.title" :value="item.id"></el-option>
+
+              </el-select>
+            </el-form-item>
+          </el-col>
+					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
+            <el-form-item label="排序">
+              <el-input-number v-model="addForm.sort" :min="0" :max="999" controls-position="right" placeholder="请输入排序" class="w100" />
+            </el-form-item>
+					</el-col>
+
+					<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
+						<el-form-item label="摘要">
+							<el-input v-model="addForm.abstracts" type="textarea" placeholder="请输入摘要" maxlength="150"></el-input>
+						</el-form-item>
+					</el-col>
+          <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
+            <el-form-item label="内容">
+              <Editor v-model="addForm.description" />
+            </el-form-item>
+          </el-col>
+
 				</el-row>
 			</el-form>
 			<template #footer>
@@ -61,10 +59,12 @@ import {useRouter} from "vue-router";
 interface TableData {
   title: string;
   description: string;
-  descriptionUpload: string;
-  is_del: boolean;
+  blogCategoryId: string;
+  abstracts: string;
+  sort: number;
   createTime: string;
   pic: string;
+
 }
 
 import {reactive, toRefs, defineComponent, onMounted, onBeforeMount, defineAsyncComponent, ref} from 'vue';
@@ -81,11 +81,12 @@ interface MenuDataTree {
 }
 interface RoleState {
 	isShowDialog: boolean;
-	blogForm: {
+	addForm: {
     title: string;
     description: string;
-    descriptionUpload: string;
-    is_del: boolean;
+    blogCategoryId: string;
+    abstracts: string;
+    sort: number;
     createTime: string;
     pic: string;
 
@@ -101,20 +102,23 @@ export default defineComponent({
 	name: 'systemAddRole',
   components: {
     Upload: defineAsyncComponent(() => import('/@/components/upload/index.vue')),
+    Editor: defineAsyncComponent(() => import('/@/components/editor/index.vue')),
   },
-	setup() {
+	setup(props, {emit}) {
     const UploadRef = ref();
     onBeforeMount(() => {
     })
     const router = useRouter();
 		const state = reactive<RoleState>({
 			isShowDialog: false,
-			blogForm: {
-        title: '', // 角色名称
-        description: '', // 角色标识
-        is_del: true, // 角色状态
-        descriptionUpload: '', // 角色描述
-        pic: '',
+			addForm: {
+        title: "",
+        description: "",
+        blogCategoryId:"",
+        abstracts: "",
+        sort: 0,
+        createTime: "",
+        pic: ""
 			},
 			menuData: [],
 			menuProps: {
@@ -138,14 +142,15 @@ export default defineComponent({
 		};
 		// 新增
 		const onSubmit = () => {
-      request.postAction(API.blog,{...state.blogForm},{}).then(res => {
+      request.postAction(API.blog.add,{...state.addForm},{}).then(res => {
         console.log(res,'res')
-        if(res.data.code==0){
+        if(res.data.code==500){
           ElMessage.warning(res.data.message);
         }
         else{
           ElMessage.success('添加成功');
-          router.push('/post/article');
+          emit('searchList');
+
         }
       }).catch((e) => {
         ElMessage.warning(e);
@@ -154,110 +159,18 @@ export default defineComponent({
 		};
 		// 获取菜单结构数据
 		const getMenuData = () => {
-			state.menuData = [
-				{
-					id: 1,
-					label: '系统管理',
-					children: [
-						{
-							id: 11,
-							label: '菜单管理',
-							children: [
-								{
-									id: 111,
-									label: '菜单新增',
-								},
-								{
-									id: 112,
-									label: '菜单修改',
-								},
-								{
-									id: 113,
-									label: '菜单删除',
-								},
-								{
-									id: 114,
-									label: '菜单查询',
-								},
-							],
-						},
-						{
-							id: 12,
-							label: '角色管理',
-							children: [
-								{
-									id: 121,
-									label: '角色新增',
-								},
-								{
-									id: 122,
-									label: '角色修改',
-								},
-								{
-									id: 123,
-									label: '角色删除',
-								},
-								{
-									id: 124,
-									label: '角色查询',
-								},
-							],
-						},
-						{
-							id: 13,
-							label: '用户管理',
-							children: [
-								{
-									id: 131,
-									label: '用户新增',
-								},
-								{
-									id: 132,
-									label: '用户修改',
-								},
-								{
-									id: 133,
-									label: '用户删除',
-								},
-								{
-									id: 134,
-									label: '用户查询',
-								},
-							],
-						},
-					],
-				},
-				{
-					id: 2,
-					label: '权限管理',
-					children: [
-						{
-							id: 21,
-							label: '前端控制',
-							children: [
-								{
-									id: 211,
-									label: '页面权限',
-								},
-								{
-									id: 212,
-									label: '页面权限',
-								},
-							],
-						},
-						{
-							id: 22,
-							label: '后端控制',
-							children: [
-								{
-									id: 221,
-									label: '页面权限',
-								},
-							],
-						},
-					],
-				},
-			];
+
+      request.getAction(API.blogcategory.list, {}, {}).then(res => {
+        if(res.data.code==500){
+          ElMessage.warning(res.data.message);
+        }
+        else{
+          state.menuData = res.data.data;
+        }
+
+      }).catch((e) => {
+        ElMessage.warning(e);
+      })
 		};
 		return {
 			openDialog,

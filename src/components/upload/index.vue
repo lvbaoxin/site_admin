@@ -2,7 +2,7 @@
 <div>
   <el-upload
       class="avatar-uploader"
-      action="http://localhost:8000/upload_handle/"
+      action="http://localhost:8000/blog/upload_handle/"
       :show-file-list="false"
       :on-success="handleAvatarSuccess"
       :before-upload="beforeAvatarUpload"

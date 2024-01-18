@@ -1,43 +1,48 @@
 <template>
 	<div class="system-edit-role-container">
 		<el-dialog title="修改文章" v-model="isShowDialog" width="769px">
-			<el-form :model="ruleForm" size="default" label-width="90px">
+			<el-form :model="editForm" size="default" label-width="90px">
 				<el-row :gutter="35">
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="角色名称">
-							<el-input v-model="ruleForm.roleName" placeholder="请输入角色名称" clearable></el-input>
+						<el-form-item label="标题">
+							<el-input v-model="editForm.title" placeholder="请输入标题" clearable></el-input>
 						</el-form-item>
 					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="角色标识">
-							<template #label>
-								<el-tooltip effect="dark" content="用于 `router/route.ts` meta.roles" placement="top-start">
-									<span>角色标识</span>
-								</el-tooltip>
-							</template>
-							<el-input v-model="ruleForm.roleSign" placeholder="请输入角色标识" clearable></el-input>
-						</el-form-item>
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="封面">
-							<el-input-number v-model="ruleForm.sort" :min="0" :max="999" controls-position="right" placeholder="请输入排序" class="w100" />
-						</el-form-item>
-					</el-col>
-					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="角色状态">
-							<el-switch v-model="ruleForm.status" inline-prompt active-text="启" inactive-text="禁"></el-switch>
-						</el-form-item>
-					</el-col>
-					<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
-						<el-form-item label="角色描述">
-							<el-input v-model="ruleForm.describe" type="textarea" placeholder="请输入角色描述" maxlength="150"></el-input>
-						</el-form-item>
-					</el-col>
-<!--					<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">-->
-<!--						<el-form-item label="菜单权限">-->
-<!--							<el-tree :data="menuData" :props="menuProps" :default-checked-keys="[112, 113]" node-key="id" show-checkbox class="menu-data-tree" />-->
+          <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
+            <el-form-item label="分类">
+              <el-select v-model="editForm.blogCategoryId"  placeholder="请选择文章分类"  class="w100">
+                <el-option v-for="item in menuData" :label="item.title" :value="item.id"></el-option>
+
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
+            <el-form-item label="排序">
+              <el-input-number v-model="editForm.sort" :min="0" :max="999" controls-position="right" placeholder="请输入排序" class="w100" />
+            </el-form-item>
+          </el-col>
+<!--					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">-->
+<!--						<el-form-item label="封面">-->
+<!--							<el-input-number v-model="editForm.sort" :min="0" :max="999" controls-position="right" placeholder="请输入排序" class="w100" />-->
 <!--						</el-form-item>-->
 <!--					</el-col>-->
+          <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
+            <el-form-item label="分类">
+              <el-input-number v-model="editForm.type" :min="0" :max="999" controls-position="right" placeholder="请选择分类" class="w100" />
+            </el-form-item>
+          </el-col>
+
+          <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
+            <el-form-item label="摘要">
+              <el-input v-model="editForm.abstracts" type="textarea" placeholder="请输入摘要" maxlength="150"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
+            <el-form-item label="内容">
+              <Editor v-model="editForm.description" />
+            </el-form-item>
+          </el-col>
+
 				</el-row>
 			</el-form>
 			<template #footer>
@@ -51,7 +56,7 @@
 </template>
 
 <script lang="ts">
-import { reactive, toRefs, defineComponent } from 'vue';
+import {reactive, toRefs, defineComponent, defineAsyncComponent} from 'vue';
 import request from "/@/utils/manage";
 import API from "/@/api/api";
 import {ElMessage} from "element-plus";
@@ -63,15 +68,17 @@ interface MenuDataTree {
 	children?: MenuDataTree[];
 }
 interface DialogRow {
-	roleName: string;
-	roleSign: string;
-	sort: number;
-	status: boolean;
-	describe: string;
+  title: string;
+  description: string;
+  type: number;
+  abstracts: string;
+  sort: number;
+  createTime: string;
+  pic: string;
 }
 interface RoleState {
 	isShowDialog: boolean;
-	ruleForm: DialogRow;
+	editForm: DialogRow;
 	menuData: Array<MenuDataTree>;
 	menuProps: {
 		children: string;
@@ -81,15 +88,21 @@ interface RoleState {
 
 export default defineComponent({
 	name: 'systemEditRole',
-	setup() {
+  components: {
+    Upload: defineAsyncComponent(() => import('/@/components/upload/index.vue')),
+    Editor: defineAsyncComponent(() => import('/@/components/editor/index.vue')),
+  },
+	setup(props, {emit}) {
 		const state = reactive<RoleState>({
 			isShowDialog: false,
-			ruleForm: {
-				roleName: '', // 角色名称
-				roleSign: '', // 角色标识
-				sort: 0, // 排序
-				status: true, // 角色状态
-				describe: '', // 角色描述
+			editForm: {
+        title: "",
+        description: "",
+        type: 0,
+        abstracts: "",
+        sort: 0,
+        createTime: "",
+        pic: ""
 			},
 			menuData: [],
 			menuProps: {
@@ -99,7 +112,8 @@ export default defineComponent({
 		});
 		// 打开弹窗
 		const openDialog = (row: DialogRow) => {
-			state.ruleForm = row;
+      console.log(JSON.parse(JSON.stringify(row)))
+			state.editForm = JSON.parse(JSON.stringify(row));
 			state.isShowDialog = true;
 			getMenuData();
 		};
@@ -113,14 +127,15 @@ export default defineComponent({
 		};
 		// 新增
 		const onSubmit = () => {
-      console.log({...state.ruleForm},'ruleForm')
-      request.putAction(API.role,{...state.ruleForm},{}).then(res => {
+      console.log({...state.editForm},'editForm')
+      request.postAction(API.blog.update,{...state.editForm},{}).then(res => {
         console.log(res,'res')
-        if(res.data.code==0){
+        if(res.data.code==500){
           ElMessage.warning(res.data.message);
         }
         else{
           ElMessage.success('修改成功');
+          emit('searchList');
         }
       }).catch((e) => {
         ElMessage.warning(e);
@@ -129,110 +144,17 @@ export default defineComponent({
 		};
 		// 获取菜单结构数据
 		const getMenuData = () => {
-			state.menuData = [
-				{
-					id: 1,
-					label: '系统管理',
-					children: [
-						{
-							id: 11,
-							label: '菜单管理',
-							children: [
-								{
-									id: 111,
-									label: '菜单新增',
-								},
-								{
-									id: 112,
-									label: '菜单修改',
-								},
-								{
-									id: 113,
-									label: '菜单删除',
-								},
-								{
-									id: 114,
-									label: '菜单查询',
-								},
-							],
-						},
-						{
-							id: 12,
-							label: '角色管理',
-							children: [
-								{
-									id: 121,
-									label: '角色新增',
-								},
-								{
-									id: 122,
-									label: '角色修改',
-								},
-								{
-									id: 123,
-									label: '角色删除',
-								},
-								{
-									id: 124,
-									label: '角色查询',
-								},
-							],
-						},
-						{
-							id: 13,
-							label: '用户管理',
-							children: [
-								{
-									id: 131,
-									label: '用户新增',
-								},
-								{
-									id: 132,
-									label: '用户修改',
-								},
-								{
-									id: 133,
-									label: '用户删除',
-								},
-								{
-									id: 134,
-									label: '用户查询',
-								},
-							],
-						},
-					],
-				},
-				{
-					id: 2,
-					label: '权限管理',
-					children: [
-						{
-							id: 21,
-							label: '前端控制',
-							children: [
-								{
-									id: 211,
-									label: '页面权限',
-								},
-								{
-									id: 212,
-									label: '页面权限',
-								},
-							],
-						},
-						{
-							id: 22,
-							label: '后端控制',
-							children: [
-								{
-									id: 221,
-									label: '页面权限',
-								},
-							],
-						},
-					],
-				},
-			];
+      request.getAction(API.blogcategory.list, {}, {}).then(res => {
+        if(res.data.code==500){
+          ElMessage.warning(res.data.message);
+        }
+        else{
+          state.menuData = res.data.data;
+        }
+
+      }).catch((e) => {
+        ElMessage.warning(e);
+      })
 		};
 		return {
 			openDialog,
