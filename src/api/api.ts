@@ -4,7 +4,13 @@ const API = {
    role: {
       list: base_url + 'role/list',
    },
-   blog: base_url + 'blog/',
+   blog: {
+      list: base_url + 'blog/list',
+      add: base_url + 'blog/add',
+      update: base_url + 'blog/update',
+      delete: base_url + 'blog/delete',
+      listPage: base_url + 'blog/listPage',
+   },
    user: {
       list: base_url + 'user/list',
       login: base_url + 'user/login',

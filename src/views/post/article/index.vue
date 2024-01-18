@@ -2,7 +2,7 @@
 	<div class="system-role-container layout-padding">
 		<div class="system-role-padding layout-padding-auto layout-padding-view">
 			<div class="system-user-search mb15">
-				<el-input v-model="tableData.param.search" size="default" placeholder="请输入角色名称" style="max-width: 180px"> </el-input>
+				<el-input v-model="tableData.param.search" size="default" placeholder="请输入文章标题" style="max-width: 180px"> </el-input>
 				<el-button size="default" type="primary" class="ml10" @click="searchList">
 					<el-icon>
 						<ele-Search />
@@ -18,19 +18,14 @@
 			</div>
 			<el-table :data="tableData.data" style="width: 100%">
 				<el-table-column prop="title" label="标题" show-overflow-tooltip></el-table-column>
-				<el-table-column prop="pic" label="封面" >
-          <template #default="scope">
-          <el-image style="width: 100px; height: 100px; border-radius: 5px" :src="scope.row.pic"  :title="scope.row.title"> </el-image>
-          </template>
-        </el-table-column>
-				<el-table-column prop="is_del" label="展示" show-overflow-tooltip>
-					<template #default="scope">
-						<el-tag type="success" v-if="scope.row.is_del">是</el-tag>
-						<el-tag type="info" v-else>否</el-tag>
-					</template>
-				</el-table-column>
-				<el-table-column prop="description" label="角色描述" show-overflow-tooltip></el-table-column>
-				<el-table-column prop="create_at" label="创建时间" show-overflow-tooltip></el-table-column>
+<!--				<el-table-column prop="pic" label="封面" >-->
+<!--          <template #default="scope">-->
+<!--          <el-image style="width: 100px; height: 100px; border-radius: 5px" :src="scope.row.pic"  :title="scope.row.title"> </el-image>-->
+<!--          </template>-->
+<!--        </el-table-column>-->
+        <el-table-column prop="sort" label="排序" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="abstracts" label="摘要" show-overflow-tooltip></el-table-column>
+				<el-table-column prop="createAt" label="创建时间" show-overflow-tooltip></el-table-column>
 				<el-table-column label="操作" width="100">
 					<template #default="scope">
 						<el-button  size="small" text type="primary" @click="onOpenEditArticle(scope.row)"
@@ -111,14 +106,11 @@ export default defineComponent({
 		});
 		// 初始化表格数据
 		const initTableData = (val:any) => {
-      request.getAction(API.blog, {...state.tableData.param},{}).then(res => {
+      request.postAction(API.blog.listPage, {...state.tableData.param},{}).then(res => {
         console.log(res,'res')
 
-        state.tableData.data = res.data.data.map((item:any) =>{
-          item.pic = 'http://localhost:8000'+ item.pic
-          return item
-        });
-        state.tableData.total = res.data.cont;
+        state.tableData.data = res.data.data
+        state.tableData.total = res.data.total;
       }).catch((e) => {
         ElMessage.warning(e);
       })
