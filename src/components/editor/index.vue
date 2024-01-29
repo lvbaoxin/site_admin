@@ -55,7 +55,7 @@ export default defineComponent({
 		// 编辑器内容改变时
 		const handleChange = (editor: any) => {
 			// console.log(editor.getText());
-			// console.log(editor.getHtml());
+		console.log(editor.getHtml());
 			emit('update:modelValue', editor.getHtml());
 		};
 		// 监听是否禁用改变

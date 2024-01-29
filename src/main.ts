@@ -11,12 +11,15 @@ import request from '/@/utils/manage'
 import 'element-plus/dist/index.css';
 import '/@/theme/index.scss';
 import VueGridLayout from 'vue-grid-layout';
-
-
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
+import CKEditor from '@ckeditor/ckeditor5-vue';
+// <script src="../node_modules/@ckeditor/ckeditor5-build-classic/build/ckeditor.js"></script>
+//     <script src="../node_modules/@ckeditor/ckeditor5-vue/dist/ckeditor.js"></script>
 const app = createApp(App);
 
 directive(app);
 other.elSvg(app);
 app.config.globalProperties.$api = API
 app.config.globalProperties.$request = request
-app.use(pinia).use(router).use(ElementPlus, { i18n: i18n.global.t }).use(i18n).use(VueGridLayout).mount('#app');
+app.use(pinia).use(router).use(ElementPlus, { i18n: i18n.global.t }).use(i18n).use(VueGridLayout).use( CKEditor ).mount('#app');
+

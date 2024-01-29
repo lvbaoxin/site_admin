@@ -26,11 +26,7 @@
 <!--							<el-input-number v-model="editForm.sort" :min="0" :max="999" controls-position="right" placeholder="请输入排序" class="w100" />-->
 <!--						</el-form-item>-->
 <!--					</el-col>-->
-          <el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-            <el-form-item label="分类">
-              <el-input-number v-model="editForm.type" :min="0" :max="999" controls-position="right" placeholder="请选择分类" class="w100" />
-            </el-form-item>
-          </el-col>
+
 
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
             <el-form-item label="摘要">
@@ -70,6 +66,7 @@ interface MenuDataTree {
 interface DialogRow {
   title: string;
   description: string;
+
   type: number;
   abstracts: string;
   sort: number;
@@ -114,6 +111,7 @@ export default defineComponent({
 		const openDialog = (row: DialogRow) => {
       console.log(JSON.parse(JSON.stringify(row)))
 			state.editForm = JSON.parse(JSON.stringify(row));
+
 			state.isShowDialog = true;
 			getMenuData();
 		};
